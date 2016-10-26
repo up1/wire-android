@@ -152,6 +152,9 @@
         <item name="typingIndicatorBox">@style/typing_indicator_box_dark</item>
         <item name="typingIndicatorText">@style/typing_indicator_text_dark</item>
 
+        <!-- Start UI Toolbar -->
+        <item name="sketchToolbar">@style/sketch_toolbar</item>
+
     </style>
 
     <style name="Theme.Light" parent="@style/Theme.Design.Light.NoActionBar">
@@ -283,6 +286,9 @@
         <!-- Typing indicator -->
         <item name="typingIndicatorBox">@style/typing_indicator_box_light</item>
         <item name="typingIndicatorText">@style/typing_indicator_text_light</item>
+
+        <!-- Start UI Toolbar -->
+        <item name="sketchToolbar">@style/sketch_toolbar</item>
 
     </style>
 

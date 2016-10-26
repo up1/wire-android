@@ -386,6 +386,14 @@
         <item name="android:maxLines">1</item>
     </style>
 
+    <style name="sketch_toolbar" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:textSize">@dimen/wire__text_size__regular</item>
+        <item name="font">@string/wire__typeface__regular</item>
+        <item name="android:background">@drawable/toolbar_selectable_background__light</item>
+        <item name="android:textColor">@color/wire__text_color_primary_light_selector</item>
+        <item name="titleTextColor">@color/wire__text_color_primary_light_selector</item>
+    </style>
+
     <style name="Theme.Dark.Dialog" parent="Theme.AppCompat.Dialog">
         <item name="colorPrimary">@color/dark_theme_primary</item>
         <item name="colorPrimaryDark">@color/dark_theme_primary_dark</item>

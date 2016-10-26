@@ -28,6 +28,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import com.waz.zclient.ui.R;
 import net.hockeyapp.android.ExceptionHandler;
@@ -62,7 +63,16 @@ public class DrawingCanvasView extends View {
     private String emoji;
     private boolean drawEmoji;
 
+    private Text textHistoryItem;
+
     private LinkedList<HistoryItem> historyItems; // NOPMD
+
+    public enum Mode {
+        SKETCH,
+        TEXT,
+        EMOJI
+    }
+    private Mode currentMode;
 
     public DrawingCanvasView(Context context) {
         this(context, null);
@@ -93,6 +103,7 @@ public class DrawingCanvasView extends View {
         emojiPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         emojiPaint.setStrokeWidth(1);
         emoji = null;
+        currentMode = Mode.SKETCH;
 
         trimBuffer = getResources().getDimensionPixelSize(R.dimen.draw_image_trim_buffer);
     }
@@ -151,7 +162,10 @@ public class DrawingCanvasView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (gestureDetector.onTouchEvent(event) && backgroundBitmap == null) {
+        if (currentMode == Mode.TEXT) {
+            return scaleGestureDetector.onTouchEvent(event);
+        }
+        if (longPressGestureDetector.onTouchEvent(event) && backgroundBitmap == null) {
             invalidate();
             return true;
         }
@@ -180,9 +194,41 @@ public class DrawingCanvasView extends View {
         return true;
     }
 
-    private final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+    private final ScaleGestureDetector scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        float scaleFactor = 1f;
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            if (drawingCanvasCallback != null) {
+                drawingCanvasCallback.onScaleStart();
+            }
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            if (drawingCanvasCallback != null) {
+                drawingCanvasCallback.onScaleEnd();
+            }
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            scaleFactor *= detector.getScaleFactor();
+            // Don't let the object get too small or too large.
+            scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f));
+            if (drawingCanvasCallback != null) {
+                drawingCanvasCallback.onScaleChanged(scaleFactor);
+            }
+            return true;
+        }
+    }
+
+    private final GestureDetector longPressGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
         public void onLongPress(MotionEvent e) {
-            if (backgroundBitmap != null || drawEmoji) {
+            if (backgroundBitmap != null || currentMode != Mode.SKETCH) {
                 return;
             }
             drawingPaint.setStyle(Paint.Style.FILL);
@@ -195,12 +241,12 @@ public class DrawingCanvasView extends View {
     });
 
     private void touch_start(float x, float y) {
-        if (emoji == null) {
+        if (currentMode == Mode.SKETCH) {
             path.reset();
             path.moveTo(x, y);
             currentX = x;
             currentY = y;
-        } else {
+        } else if (currentMode == Mode.EMOJI) {
             drawEmoji = true;
             currentX = x - emojiPaint.getTextSize() / 2;
             currentY = y;
@@ -312,7 +358,7 @@ public class DrawingCanvasView extends View {
 
     public void setDrawingColor(int color) {
         drawingPaint.setColor(color);
-        emoji = null;
+        emojiPaint.setColor(color);
     }
 
     public void setStrokeSize(int strokeSize) {
@@ -320,8 +366,17 @@ public class DrawingCanvasView extends View {
     }
 
     public void setEmoji(String emoji, float size) {
+        currentMode = Mode.EMOJI;
         this.emoji = emoji;
         emojiPaint.setTextSize(size);
+    }
+
+    public void setCurrentMode(Mode mode) {
+        currentMode = mode;
+    }
+
+    public Mode getCurrentMode() {
+        return currentMode;
     }
 
     public boolean undo() {
@@ -341,6 +396,26 @@ public class DrawingCanvasView extends View {
         }
         invalidate();
         return true;
+    }
+
+    public void drawTextBitmap(Bitmap textBitmap, float x, float y) {
+        if (textHistoryItem != null) {
+            historyItems.remove(textHistoryItem);
+            textHistoryItem.recycle();
+        }
+        if (textBitmap != null) {
+            textHistoryItem = new Text(textBitmap, x, y, bitmapPaint);
+            historyItems.add(textHistoryItem);
+        }
+        canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), whitePaint);
+        paintedOn(historyItems.size() > 0);
+        if (includeBackgroundImage) {
+            drawBackgroundBitmap();
+        }
+        for (HistoryItem item : historyItems) {
+            item.draw(canvas);
+        }
+        invalidate();
     }
 
     private void paintedOn(boolean isPaintedOn) {
@@ -464,6 +539,28 @@ public class DrawingCanvasView extends View {
         }
     }
 
+    private class Text implements HistoryItem {
+        private final float x;
+        private final float y;
+        private final Bitmap bitmap;
+        private final Paint paint;
+        Text(Bitmap bitmap, float currentX, float currentY, Paint paint) {
+            this.bitmap = bitmap;
+            this.x = currentX;
+            this.y = currentY;
+            this.paint = paint;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            canvas.drawBitmap(bitmap, x, y, paint);
+        }
+
+        public void recycle() {
+            bitmap.recycle();
+        }
+    }
+
     private class FilledScreen implements HistoryItem {
         private final float width;
         private final float height;
@@ -501,6 +598,12 @@ public class DrawingCanvasView extends View {
         void drawingCleared();
 
         void reserveBitmapMemory(int width, int height);
+
+        void onScaleChanged(float scale);
+
+        void onScaleStart();
+
+        void onScaleEnd();
     }
 
 }

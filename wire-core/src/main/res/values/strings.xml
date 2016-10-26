@@ -854,6 +854,7 @@
     <string name="sketch__emoji_keyboard__size_label__small">SMALL</string>
     <string name="sketch__emoji_keyboard__size_label__medium">MEDIUM</string>
     <string name="sketch__emoji_keyboard__size_label__large">LARGE</string>
+    <string name="toolbar__sketch__action_close">Close</string>
 
     <!-- Location sharing -->
     <string name="location_sharing__tip">Drag the map to change location</string>

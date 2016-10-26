@@ -131,4 +131,8 @@
     <attr name="typingIndicatorBox" format="reference" />
     <attr name="typingIndicatorText" format="reference" />
 
+    <!-- sketch -->
+    <attr name="sketchToolbar" format="reference" />
+
+
 </resources>

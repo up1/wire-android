@@ -20,6 +20,7 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
@@ -27,16 +28,37 @@
               android:background="@color/white"
     >
 
-    <com.waz.zclient.ui.text.TypefaceTextView
-        android:id="@+id/ttv__drawing__conversation__name"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/drawing__conversation__name__height"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="@dimen/drawing__conversation__name__margin_top"
-        android:textSize="@dimen/drawing__conversation__name__text_size"
-        android:textColor="@color/drawing__conversation__name__color"
-        app:font="@string/wire__typeface__light"
-        />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/t_drawing_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        app:contentInsetStart="@dimen/content__padding_left"
+        style="?sketchToolbar"
+        >
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <com.waz.zclient.ui.text.TypefaceTextView
+                android:id="@+id/tv__drawing_toolbar__title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginEnd="@dimen/wire__padding__regular"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:background="@null"
+                style="?sketchToolbar"
+                />
+
+        </FrameLayout>
+
+    </android.support.v7.widget.Toolbar>
 
     <HorizontalScrollView
         android:id="@+id/hsv_color_picker_scroll_view"
@@ -114,6 +136,22 @@
 
         </FrameLayout>
 
+        <EditText
+            android:id="@+id/et__sketch_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/wire__padding__regular"
+            android:layout_marginStart="@dimen/wire__padding__regular"
+            android:minWidth="@dimen/wire__padding__regular"
+            android:background="@null"
+            android:clickable="false"
+            android:ellipsize="end"
+            android:inputType="textNoSuggestions"
+            android:textColor="@color/black"
+            android:textSize="@dimen/wire__text_size__medium"
+            android:padding="@dimen/wire__padding__regular"
+            tools:ignore="LabelFor"
+            />
 
     </FrameLayout>
 
@@ -130,41 +168,55 @@
         android:paddingEnd="@dimen/framework__general__right_padding"
         >
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            >
+
             <com.waz.zclient.ui.text.GlyphTextView
-                android:id="@+id/tv__undo_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/gtv__drawing_button__sketch"
+                android:layout_width="@dimen/wire__icon_button__diameter"
+                android:layout_height="match_parent"
                 android:gravity="center"
-                android:padding="@dimen/drawing__button__padding"
-                android:text="@string/glyph__undo"
-                android:textColor="@color/drawing__icon__disabled_color"
+                android:text="@string/glyph__paint"
+                android:textColor="@color/text__primary_light"
                 android:textSize="@dimen/wire__text_size__regular"
-                android:layout_gravity="center_vertical|left"
                 />
 
             <com.waz.zclient.ui.text.GlyphTextView
-                android:id="@+id/tv__send_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/gtv__drawing_button__emoji"
+                android:layout_width="@dimen/wire__icon_button__diameter"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/wire__padding__regular"
+                android:layout_marginEnd="@dimen/wire__padding__regular"
                 android:gravity="center"
-                android:padding="@dimen/drawing__send__button__padding"
-                android:text="@string/glyph__check"
-                android:textColor="@color/drawing__icon__disabled_color"
-                android:textSize="@dimen/wire__text_size__medium"
-                android:layout_gravity="center"
+                android:text="@string/glyph__emoji"
+                android:textColor="@color/text__primary_light"
+                android:textSize="@dimen/wire__text_size__regular"
                 />
 
             <com.waz.zclient.ui.text.GlyphTextView
-                android:id="@+id/tv__cancel_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/gtv__drawing_button__text"
+                android:layout_width="@dimen/wire__icon_button__diameter"
+                android:layout_height="match_parent"
                 android:gravity="center"
-                android:padding="@dimen/drawing__button__padding"
-                android:text="@string/glyph__close"
-                android:textColor="@color/drawing__icon__enabled_color"
+                android:text="@string/glyph__keyboard"
+                android:textColor="@color/text__primary_light"
                 android:textSize="@dimen/wire__text_size__regular"
-                android:layout_gravity="center_vertical|right"
                 />
+
+        </LinearLayout>
+        <com.waz.zclient.ui.views.CursorIconButton
+            android:id="@+id/tv__send_button"
+            android:layout_width="@dimen/cursor__menu_button__diameter"
+            android:layout_height="@dimen/cursor__menu_button__diameter"
+            android:layout_gravity="center_vertical|end"
+            android:gravity="center"
+            android:padding="@dimen/cursor__menu_button__padding"
+            android:text="@string/glyph__send"
+            android:textColor="@color/drawing__icon__disabled_color"
+            />
 
     </FrameLayout>
 
