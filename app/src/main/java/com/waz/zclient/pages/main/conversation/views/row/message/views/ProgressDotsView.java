@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import com.waz.zclient.R;
+import com.waz.zclient.ui.utils.ColorUtils;
 
 public class ProgressDotsView extends View {
 
@@ -41,6 +42,7 @@ public class ProgressDotsView extends View {
     //seems as though the animator never actually reaches the last value you set, so we go to 3 instead of just to 2
     private final ValueAnimator animator = ValueAnimator.ofInt(0, 1, 2, 3).setDuration(ANIMATION_DURATION);
     private int darkDotIndex = 0;
+    private int accentColor;
 
     private final Drawable defaultBackground;
 
@@ -87,11 +89,16 @@ public class ProgressDotsView extends View {
     public void setExpired(boolean expired) {
         this.expired = expired;
         if (expired) {
-            setBackgroundResource(R.drawable.shape_audio_message_background_expired);
+            setBackground(ColorUtils.getTintedDrawable(getContext(), R.drawable.shape_audio_message_background_expired, accentColor));
         } else {
             setBackground(defaultBackground);
         }
         invalidate();
+    }
+
+    public void setAccentColor(int accentColor) {
+        this.accentColor = accentColor;
+        setExpired(expired);
     }
 
     @Override

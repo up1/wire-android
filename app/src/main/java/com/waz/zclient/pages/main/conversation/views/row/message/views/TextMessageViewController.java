@@ -23,17 +23,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import com.waz.api.Message;
 import com.waz.zclient.R;
+import com.waz.zclient.controllers.accentcolor.AccentColorObserver;
 import com.waz.zclient.controllers.tracking.events.conversation.ReactedToMessageEvent;
 import com.waz.zclient.controllers.userpreferences.IUserPreferencesController;
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
+import com.waz.zclient.ui.utils.ColorUtils;
 import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
 import com.waz.zclient.utils.ViewUtils;
 import com.waz.zclient.views.OnDoubleClickListener;
 
-public class TextMessageViewController extends MessageViewController implements TextMessageLinkTextView.Callback {
+public class TextMessageViewController extends MessageViewController implements TextMessageLinkTextView.Callback,
+                                                                                AccentColorObserver {
 
     private View view;
     private TextMessageLinkTextView textView;
@@ -94,6 +97,8 @@ public class TextMessageViewController extends MessageViewController implements 
     public void onSetMessage(Separator separator) {
         textView.setMessage(message);
         messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(textView);
+        messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(this);
+        onAccentColorHasChanged(this, messageViewsContainer.getControllerFactory().getAccentColorController().getColor());
         ephemeralDotAnimationView.setMessage(message);
     }
 
@@ -122,6 +127,7 @@ public class TextMessageViewController extends MessageViewController implements 
     public void recycle() {
         if (!messageViewsContainer.isTornDown()) {
             messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(textView);
+            messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(this);
         }
         textView.recycle();
         ephemeralDotAnimationView.setMessage(null);
@@ -131,5 +137,17 @@ public class TextMessageViewController extends MessageViewController implements 
     @Override
     public void onTextMessageLinkTextViewOnLongClicked(View view) {
         onLongClick(view);
+    }
+
+    @Override
+    public void onAccentColorHasChanged(Object sender, int color) {
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isEphemeral()) {
+            textView.setTextColor(color);
+        }
     }
 }

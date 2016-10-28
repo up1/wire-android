@@ -46,13 +46,14 @@ import com.waz.zclient.core.api.scala.ModelObserver;
 import com.waz.zclient.ui.R;
 import com.waz.zclient.ui.animation.interpolators.penner.Expo;
 import com.waz.zclient.ui.animation.interpolators.penner.Quart;
+import com.waz.zclient.ui.utils.ColorUtils;
 import com.waz.zclient.ui.utils.CursorUtils;
+import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.utils.TypefaceUtils;
 import com.waz.zclient.ui.views.CursorIconButton;
 import com.waz.zclient.utils.LayoutSpec;
 import com.waz.zclient.utils.StringUtils;
 import com.waz.zclient.utils.ViewUtils;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,6 +91,7 @@ public class CursorLayout extends FrameLayout implements
     private TextView hintView;
     private View dividerView;
     private CursorIconButton emojiButton;
+    private CursorIconButton keyboardButton;
 
     private CursorCallback cursorCallback;
     private boolean sendButtonIsVisible;
@@ -127,6 +129,10 @@ public class CursorLayout extends FrameLayout implements
                 ephemeralButton.setTextColor(ephemeralColor);
                 updateEphemeralButtonBackground();
                 sendButton.setSolidBackgroundColor(ephemeralColor);
+                emojiButton.showEphemeralMode(ephemeralColor);
+                keyboardButton.showEphemeralMode(ephemeralColor);
+                mainToolbar.showEphemeralMode(ephemeralColor);
+                secondaryToolbar.showEphemeralMode(ephemeralColor);
             } else {
                 dividerView.setBackgroundColor(defaultDividerColor);
                 hintView.setText(R.string.cursor__type_a_message);
@@ -134,6 +140,10 @@ public class CursorLayout extends FrameLayout implements
                 ephemeralButton.setTextColor(defaultEditTextColor);
                 updateEphemeralButtonBackground();
                 sendButton.setSolidBackgroundColor(accentColor);
+                emojiButton.hideEphemeralMode(defaultEditTextColor);
+                keyboardButton.hideEphemeralMode(defaultEditTextColor);
+                mainToolbar.hideEphemeraMode(defaultEditTextColor);
+                secondaryToolbar.hideEphemeraMode(defaultEditTextColor);
             }
 
             if (!isEditingMessage &&
@@ -226,16 +236,23 @@ public class CursorLayout extends FrameLayout implements
         ColorDrawable dividerBg = (ColorDrawable) dividerView.getBackground();
         defaultDividerColor = dividerBg.getColor();
 
-        // Emoji button
+        // Emoji & keyboard button
         LayoutInflater inflater = LayoutInflater.from(getContext());
         emojiButton = (CursorIconButton) inflater.inflate(R.layout.cursor__item, this, false);
-        emojiButton.setText(R.string.glyph__emoji);
+        emojiButton.setCursorMenuItem(CursorMenuItem.EMOJI);
         emojiButton.setPressedBackgroundColor(ContextCompat.getColor(getContext(), R.color.light_graphite));
+
+        keyboardButton = (CursorIconButton) inflater.inflate(R.layout.cursor__item, this, false);
+        keyboardButton.setCursorMenuItem(CursorMenuItem.KEYBOARD);
+        keyboardButton.setPressedBackgroundColor(ContextCompat.getColor(getContext(), R.color.light_graphite));
+        keyboardButton.setVisibility(GONE);
+
         int buttonWidth = getResources().getDimensionPixelSize(R.dimen.cursor__menu_button__diameter);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(buttonWidth,
                                                                        buttonWidth);
         params.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
         params.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.chathead__margin));
+        emojiButtonContainer.addView(keyboardButton, params);
         emojiButtonContainer.addView(emojiButton, params);
         emojiButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -244,23 +261,36 @@ public class CursorLayout extends FrameLayout implements
                     return;
                 }
                 mainToolbar.unselectItems();
-                if (getContext().getString(R.string.glyph__emoji).equals(emojiButton.getText())) {
-                    emojiButton.setText(R.string.glyph__keyboard);
-                    cursorCallback.onEmojiButtonClicked(true);
-                    resetEphemeralButton();
-                } else {
-                    emojiButton.setText(R.string.glyph__emoji);
-                    cursorCallback.onEmojiButtonClicked(false);
-                    resetEphemeralButton();
-                }
+                emojiButton.setVisibility(GONE);
+                keyboardButton.setVisibility(VISIBLE);
+                cursorCallback.onEmojiButtonClicked(true);
+                resetEphemeralButton();
+
             }
         });
 
+        keyboardButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (cursorCallback == null) {
+                    return;
+                }
+                mainToolbar.unselectItems();
+                emojiButton.setVisibility(VISIBLE);
+                keyboardButton.setVisibility(GONE);
+                cursorCallback.onEmojiButtonClicked(false);
+                resetEphemeralButton();
+            }
+        });
+
+
         // Send button
+        int sendButtonWidth = getResources().getDimensionPixelSize(R.dimen.cursor__send_button__width);
+        int sendButtonHeight = getResources().getDimensionPixelSize(R.dimen.cursor__send_button__height);
         sendButton = (CursorIconButton) inflater.inflate(R.layout.cursor__item, this, false);
         sendButton.setText(R.string.glyph__send);
         sendButton.setTextColor(ContextCompat.getColor(getContext(), R.color.text__primary_dark));
-        sendButtonContainer.addView(sendButton, new FrameLayout.LayoutParams(buttonWidth, buttonWidth));
+        sendButtonContainer.addView(sendButton, new FrameLayout.LayoutParams(sendButtonWidth, sendButtonHeight));
         sendButton.setVisibility(View.INVISIBLE);
 
         // Ephemeral button
@@ -268,9 +298,7 @@ public class CursorLayout extends FrameLayout implements
         ephemeralButton.setText(R.string.glyph__hourglass);
         ephemeralButton.setTextColor(defaultEditTextColor);
         ephemeralButton.setGravity(Gravity.CENTER);
-        int ephemeralButtonWidth = getResources().getDimensionPixelSize(R.dimen.cursor__ephemeral_button__width);
-        int ephemeralButtonHeight = getResources().getDimensionPixelSize(R.dimen.cursor__ephemeral_button__height);
-        params = new FrameLayout.LayoutParams(ephemeralButtonWidth, ephemeralButtonHeight);
+        params = new FrameLayout.LayoutParams(sendButtonWidth, sendButtonHeight);
         params.gravity = Gravity.CENTER;
         sendButtonContainer.addView(ephemeralButton, params);
         ephemeralButton.setOnClickListener(new OnClickListener() {
@@ -294,11 +322,22 @@ public class CursorLayout extends FrameLayout implements
     }
 
     public void setAccentColor(int accentColor) {
+        ephemeralColor = accentColor;
         newCursorEditText.setAccentColor(accentColor);
+        sendButton.setSolidBackgroundColor(accentColor);
         mainToolbar.setAccentColor(accentColor);
         this.accentColor = accentColor;
         if (conversation == null || !conversation.isEphemeral()) {
             sendButton.setSolidBackgroundColor(accentColor);
+        } else if (conversation.isEphemeral()) {
+            emojiButton.showEphemeralMode(ephemeralColor);
+            mainToolbar.showEphemeralMode(ephemeralColor);
+            secondaryToolbar.showEphemeralMode(ephemeralColor);
+            hintView.setTextColor(ephemeralColor);
+            dividerView.setBackgroundColor(ephemeralColor);
+            ephemeralButton.setTextColor(ephemeralColor);
+            keyboardButton.setTextColor(ephemeralColor);
+            updateEphemeralButtonBackground();
         }
     }
 
@@ -517,7 +556,8 @@ public class CursorLayout extends FrameLayout implements
 
     @Override
     public void onCursorButtonLongPressed(CursorMenuItem cursorMenuItem) {
-        if (cursorMenuItem == CursorMenuItem.DUMMY) {
+        if (cursorMenuItem == CursorMenuItem.DUMMY ||
+            cursorMenuItem == CursorMenuItem.KEYBOARD) {
             return;
         }
         if (cursorCallback != null) {
@@ -795,7 +835,8 @@ public class CursorLayout extends FrameLayout implements
     }
 
     private void resetEmojiButton() {
-        emojiButton.setText(R.string.glyph__emoji);
+        keyboardButton.setVisibility(GONE);
+        emojiButton.setVisibility(VISIBLE);
     }
 
     private void resetEphemeralButton() {
@@ -806,29 +847,32 @@ public class CursorLayout extends FrameLayout implements
     }
 
     private void updateEphemeralButtonBackground() {
-        if (conversation.isEphemeral()) {
+        if (conversation != null &&
+            conversation.isEphemeral()) {
             EphemeralExpiration expiration = conversation.getEphemeralExpiration();
             final String value;
-            final int background;
             switch (expiration) {
                 case ONE_DAY:
-                    value = String.valueOf(expiration.milliseconds / 1000 / 60 / 60 / 24);
-                    background = R.drawable.ephemeral_day;
+                    value = getResources().getString(R.string.cursor__ephemeral_message__timer_days,
+                                                     String.valueOf(expiration.milliseconds / 1000 / 60 / 60 / 24));
                     break;
                 case ONE_MINUTE:
                 case FIVE_MINUTES:
-                    value = String.valueOf(expiration.milliseconds / 1000 / 60);
-                    background = R.drawable.ephemeral_min;
+                    value = getResources().getString(R.string.cursor__ephemeral_message__timer_min,
+                                                     String.valueOf(expiration.milliseconds / 1000 / 60));
                     break;
                 case FIVE_SECONDS:
                 case FIFTEEN_SECONDS:
                 case THIRTY_SECONDS:
                 case NONE:
                 default:
-                    value = String.valueOf(expiration.milliseconds / 1000);
-                    background = R.drawable.ephemeral_sec;
+                    value = getResources().getString(R.string.cursor__ephemeral_message__timer_seconds,
+                                                     String.valueOf(expiration.milliseconds / 1000));
             }
-            ephemeralButton.setBackgroundResource(background);
+            int bgColor = ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                 accentColor);
+            ephemeralButton.setBackground(ColorUtils.getTintedDrawable(getContext(), R.drawable.background__cursor__ephemeral_timer,
+                                                                       bgColor));
             ephemeralButton.setText(value);
             ephemeralButton.setTypeface(TypefaceUtils.getTypeface(getContext().getString(R.string.wire__typeface__regular)));
             ephemeralButton.setTextSize(TypedValue.COMPLEX_UNIT_PX, getContext().getResources().getDimensionPixelSize(R.dimen.wire__text_size__small));

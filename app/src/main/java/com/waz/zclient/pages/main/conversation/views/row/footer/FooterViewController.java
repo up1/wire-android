@@ -256,7 +256,7 @@ public class FooterViewController implements ConversationItemViewController,
                     }
                 }, EPHEMERAL_REFRESH_TIMEOUT);
             }
-            linkHighlightColor = ContextCompat.getColor(context, R.color.ephemera);
+            linkHighlightColor = container.getControllerFactory().getAccentColorController().getColor();
             linkUnderlined = false;
         } else if (message.getUser().isMe()) {
             switch (message.getMessageStatus()) {

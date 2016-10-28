@@ -45,6 +45,9 @@ import com.waz.zclient.core.stores.network.DefaultNetworkAction;
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
+import com.waz.zclient.ui.theme.ThemeUtils;
+import com.waz.zclient.ui.utils.ColorUtils;
+import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
 import com.waz.zclient.utils.AssetUtils;
 import com.waz.zclient.utils.StringUtils;
@@ -71,6 +74,7 @@ public class VideoMessageViewController extends MessageViewController implements
     private TextView videoInfoText;
     private FrameLayout videoPreviewContainer;
     private EphemeralDotAnimationView ephemeralDotAnimationView;
+    private View ephemeralTypeView;
 
     private Asset asset;
 
@@ -181,6 +185,8 @@ public class VideoMessageViewController extends MessageViewController implements
         videoInfoText = ViewUtils.getView(view, R.id.ttv__row_conversation__video_info);
         videoPreviewContainer = ViewUtils.getView(view, R.id.fl__video_message_container);
         ephemeralDotAnimationView = ViewUtils.getView(view, R.id.edav__ephemeral_view);
+        ephemeralTypeView = ViewUtils.getView(view, R.id.gtv__row_conversation__video__ephemeral_type);
+        ephemeralTypeView.setVisibility(GONE);
 
         normalButtonBackground = context.getResources().getDrawable(R.drawable.selector__icon_button__background__video_message);
         errorButtonBackground = context.getResources().getDrawable(R.drawable.selector__icon_button__background__video_message__error);
@@ -235,6 +241,11 @@ public class VideoMessageViewController extends MessageViewController implements
     @Override
     public void onAccentColorHasChanged(Object sender, int color) {
         actionButton.setProgressColor(color);
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        placeHolderDots.setAccentColor(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                              color));
     }
 
     private void refreshPreviewSize() {
@@ -468,6 +479,7 @@ public class VideoMessageViewController extends MessageViewController implements
         actionButton.setVisibility(GONE);
         previewImage.setVisibility(INVISIBLE);
         videoInfoText.setText("");
+        ephemeralTypeView.setVisibility(VISIBLE);
     }
 
 }

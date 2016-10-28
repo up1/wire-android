@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
@@ -30,12 +29,15 @@ import com.waz.api.ImageAsset;
 import com.waz.api.LoadHandle;
 import com.waz.api.Message;
 import com.waz.zclient.R;
+import com.waz.zclient.controllers.accentcolor.AccentColorObserver;
 import com.waz.zclient.controllers.tracking.events.conversation.ReactedToMessageEvent;
 import com.waz.zclient.controllers.userpreferences.IUserPreferencesController;
 import com.waz.zclient.core.api.scala.ModelObserver;
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
+import com.waz.zclient.ui.theme.ThemeUtils;
+import com.waz.zclient.ui.utils.ColorUtils;
 import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.utils.TypefaceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
@@ -46,6 +48,7 @@ import com.waz.zclient.views.OnDoubleClickListener;
 import com.waz.zclient.views.images.ImageAssetView;
 
 public class LinkPreviewViewController extends MessageViewController implements ImageAssetView.BitmapLoadedCallback,
+                                                                                AccentColorObserver,
                                                                                 TextMessageLinkTextView.Callback {
 
     private View view;
@@ -167,6 +170,7 @@ public class LinkPreviewViewController extends MessageViewController implements 
         onDoubleClickListener.reset();
         messageObserver.setAndUpdate(message);
         messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(textMessageLinkTextView);
+        messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(this);
         ephemeralDotAnimationView.setMessage(message);
     }
 
@@ -188,6 +192,7 @@ public class LinkPreviewViewController extends MessageViewController implements 
     public void recycle() {
         if (!messageViewsContainer.isTornDown()) {
             messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(textMessageLinkTextView);
+            messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(this);
         }
         ephemeralDotAnimationView.setMessage(null);
         onDoubleClickListener.reset();
@@ -238,14 +243,30 @@ public class LinkPreviewViewController extends MessageViewController implements 
         if (previewImageLoadHandle != null) {
             previewImageLoadHandle.cancel();
         }
-        int ephemeralColor = ContextCompat.getColor(context, R.color.ephemera);
         previewImageAssetView.clearImage();
-        previewImageAssetView.setImageDrawable(new ColorDrawable(ephemeralColor));
+        int accent = messageViewsContainer.getControllerFactory().getAccentColorController().getColor();
+        previewImageAssetView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                                        accent)));
         Typeface redactedTypeface = TypefaceUtils.getTypeface(TypefaceUtils.getRedactedTypedaceName());
         titleTextView.setTypeface(redactedTypeface);
-        titleTextView.setTextColor(ephemeralColor);
+        titleTextView.setTextColor(accent);
         urlTextView.setTypeface(redactedTypeface);
-        urlTextView.setTextColor(ephemeralColor);
+        urlTextView.setTextColor(accent);
 
+    }
+
+    @Override
+    public void onAccentColorHasChanged(Object sender, int color) {
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isExpired()) {
+            previewImageAssetView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                                   color)));
+            urlTextView.setTextColor(color);
+            titleTextView.setTextColor(color);
+        }
     }
 }

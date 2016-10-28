@@ -20,13 +20,13 @@ package com.waz.zclient.pages.main.conversation.views.row.message.views;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import com.waz.api.UpdateListener;
 import com.waz.api.User;
 import com.waz.zclient.R;
+import com.waz.zclient.controllers.accentcolor.AccentColorObserver;
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
@@ -35,6 +35,8 @@ import com.waz.zclient.ui.animation.LeftPaddingReverseAnimation;
 import com.waz.zclient.ui.animation.interpolators.penner.Expo;
 import com.waz.zclient.ui.text.GlyphTextView;
 import com.waz.zclient.ui.text.TypefaceTextView;
+import com.waz.zclient.ui.utils.ColorUtils;
+import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.utils.TextViewUtils;
 import com.waz.zclient.ui.utils.TypefaceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
@@ -46,6 +48,7 @@ import java.util.Locale;
 
 
 public class PingMessageViewController extends MessageViewController implements UpdateListener,
+                                                                                AccentColorObserver,
                                                                                 View.OnClickListener {
     public static final String TAG = PingMessageViewController.class.getName();
     private static final long APPROXIMATE_MESSAGE_EVALUATION_DURATION = 1000L;
@@ -84,6 +87,7 @@ public class PingMessageViewController extends MessageViewController implements 
 
     @Override
     protected void onSetMessage(Separator separator) {
+        messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(this);
         user = message.getUser();
         user.addUpdateListener(this);
         message.addUpdateListener(this);
@@ -103,12 +107,12 @@ public class PingMessageViewController extends MessageViewController implements 
     public void updated() {
         textViewMessage.setText(getPingMessage());
         if (message.isEphemeral() && message.isExpired()) {
-            final int textColor = ContextCompat.getColor(context, R.color.ephemera);
             Typeface redactedTypeface = TypefaceUtils.getTypeface(TypefaceUtils.getRedactedTypedaceName());
             textViewMessage.setTypeface(redactedTypeface);
             glyphTextView.setTypeface(redactedTypeface);
-            glyphTextView.setTextColor(textColor);
-            textViewMessage.setTextColor(textColor);
+            int accent = messageViewsContainer.getControllerFactory().getAccentColorController().getColor();
+            glyphTextView.setTextColor(accent);
+            textViewMessage.setTextColor(accent);
         } else {
             final int textColor = user.getAccent().getColor();
             textViewMessage.setTypeface(originalTypeface);
@@ -201,6 +205,9 @@ public class PingMessageViewController extends MessageViewController implements 
 
     @Override
     public void recycle() {
+        if (!messageViewsContainer.isTornDown()) {
+            messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(this);
+        }
         if (user != null) {
             user.removeUpdateListener(this);
         }
@@ -232,4 +239,17 @@ public class PingMessageViewController extends MessageViewController implements 
         }
     }
 
+    @Override
+    public void onAccentColorHasChanged(Object sender, int color) {
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isExpired()) {
+            glyphTextView.setTextColor(color);
+            textViewMessage.setTextColor(color);
+        }
+    }
 }

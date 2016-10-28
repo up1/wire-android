@@ -27,7 +27,6 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import com.waz.api.ImageAsset;
@@ -50,6 +49,8 @@ import com.waz.zclient.core.stores.network.NetworkStoreObserver;
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
+import com.waz.zclient.ui.theme.ThemeUtils;
+import com.waz.zclient.ui.utils.ColorUtils;
 import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
 import com.waz.zclient.utils.MessageUtils;
@@ -67,6 +68,7 @@ public abstract class MediaPlayerViewController extends MessageViewController im
     private TextMessageLinkTextView textMessageLinkTextView;
     protected MediaPlayerView mediaPlayerView;
     private EphemeralDotAnimationView ephemeralDotAnimationView;
+    private View ephemeralTypeView;
     private View mediaPlayerContainerView;
     private boolean updateProgressEnabled;
     private LoadHandle loadHandle;
@@ -160,6 +162,8 @@ public abstract class MediaPlayerViewController extends MessageViewController im
         mediaPlayerView = ViewUtils.getView(view, R.id.mpv__row_conversation__message_media_player);
         mediaPlayerView.setOnLongClickListener(this);
         ephemeralDotAnimationView = ViewUtils.getView(view, R.id.edav__ephemeral_view);
+        ephemeralTypeView = ViewUtils.getView(view, R.id.gtv__row_conversation__media__ephemeral_type);
+        ephemeralTypeView.setVisibility(View.GONE);
         mediaPlayerContainerView = ViewUtils.getView(view, R.id.fl__row_conversation__media_player_container);
         resetMediaPlayerView(R.string.mediaplayer__artist__placeholder, getSource());
         afterInit();
@@ -526,6 +530,16 @@ public abstract class MediaPlayerViewController extends MessageViewController im
         }
         mediaPlayerView.setProgressColor(color);
         textMessageLinkTextView.onAccentColorHasChanged(sender, color);
+
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isExpired()) {
+            mediaPlayerContainerView.setBackgroundColor(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                               color));
+        }
     }
 
     protected void openExternal() {
@@ -581,7 +595,10 @@ public abstract class MediaPlayerViewController extends MessageViewController im
         }
         imageAssetModelObserver.clear();
         mediaPlayerView.setVisibility(View.INVISIBLE);
-        mediaPlayerContainerView.setBackgroundColor(ContextCompat.getColor(context, R.color.ephemera));
+        int accent = messageViewsContainer.getControllerFactory().getAccentColorController().getColor();
+        mediaPlayerContainerView.setBackgroundColor(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                           accent));
+        ephemeralTypeView.setVisibility(View.VISIBLE);
     }
 
     ///////////////////////////////////////////////////////////////////

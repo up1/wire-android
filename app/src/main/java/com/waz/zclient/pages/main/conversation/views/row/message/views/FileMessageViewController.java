@@ -42,7 +42,10 @@ import com.waz.zclient.core.controllers.tracking.events.filetransfer.SavedFileEv
 import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
+import com.waz.zclient.ui.theme.ThemeUtils;
 import com.waz.zclient.ui.utils.AssetDialogUtils;
+import com.waz.zclient.ui.utils.ColorUtils;
+import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.utils.TextViewUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
 import com.waz.zclient.utils.AssetUtils;
@@ -65,6 +68,7 @@ public class FileMessageViewController extends MessageViewController implements 
     private AssetActionButton actionButton;
     private View downloadDoneIndicatorView;
     private EphemeralDotAnimationView ephemeralDotAnimationView;
+    private View ephemeralTypeView;
 
     private TextView fileNameTextView;
     private TextView fileInfoTextView;
@@ -201,6 +205,8 @@ public class FileMessageViewController extends MessageViewController implements 
         fileNameTextView = ViewUtils.getView(view, R.id.ttv__row_conversation__file__filename);
         fileInfoTextView = ViewUtils.getView(view, R.id.ttv__row_conversation__file__fileinfo);
         ephemeralDotAnimationView = ViewUtils.getView(view, R.id.edav__ephemeral_view);
+        ephemeralTypeView = ViewUtils.getView(view, R.id.gtv__row_conversation__file__ephemeral_type);
+        ephemeralTypeView.setVisibility(GONE);
 
         failedTextColor = ContextCompat.getColor(context, R.color.accent_red);
     }
@@ -233,6 +239,11 @@ public class FileMessageViewController extends MessageViewController implements 
     @Override
     public void onAccentColorHasChanged(Object sender, int color) {
         actionButton.setProgressColor(color);
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        progressDotsView.setAccentColor(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                               color));
     }
 
     @Override
@@ -446,5 +457,6 @@ public class FileMessageViewController extends MessageViewController implements 
         assetObserver.clear();
         setProgressDotsVisible(true);
         progressDotsView.setExpired(true);
+        ephemeralTypeView.setVisibility(VISIBLE);
     }
 }

@@ -33,6 +33,7 @@ import com.waz.api.LoadHandle;
 import com.waz.api.MediaAsset;
 import com.waz.api.Message;
 import com.waz.zclient.R;
+import com.waz.zclient.controllers.accentcolor.AccentColorObserver;
 import com.waz.zclient.controllers.tracking.events.conversation.ReactedToMessageEvent;
 import com.waz.zclient.controllers.userpreferences.IUserPreferencesController;
 import com.waz.zclient.core.api.scala.ModelObserver;
@@ -43,6 +44,7 @@ import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewCont
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
 import com.waz.zclient.ui.text.GlyphTextView;
 import com.waz.zclient.ui.text.TypefaceTextView;
+import com.waz.zclient.ui.theme.ThemeUtils;
 import com.waz.zclient.ui.utils.ColorUtils;
 import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
@@ -54,9 +56,13 @@ import java.util.List;
 
 public class YouTubeMessageViewController extends MessageViewController implements View.OnClickListener,
                                                                                    ImageAsset.BitmapCallback,
+                                                                                   AccentColorObserver,
                                                                                    TextMessageLinkTextView.Callback {
 
     private View view;
+    private View imageViewContainer;
+    private View firstDivider;
+    private View secondDivider;
     private ImageView imageView;
     private TextMessageLinkTextView textMessageLinkTextView;
     private View headerContainerView;
@@ -64,6 +70,7 @@ public class YouTubeMessageViewController extends MessageViewController implemen
     private TypefaceTextView errorTextView;
     private TypefaceTextView titleTextView;
     private EphemeralDotAnimationView ephemeralDotAnimationView;
+    private View ephemeralTypeView;
 
     private LoadHandle loadHandle;
     private ImageAsset imageAsset;
@@ -143,6 +150,9 @@ public class YouTubeMessageViewController extends MessageViewController implemen
         textMessageLinkTextView.setMessageViewsContainer(messageViewsContainer);
         textMessageLinkTextView.setOnClickListener(onDoubleClickListener);
         textMessageLinkTextView.setCallback(this);
+        imageViewContainer = ViewUtils.getView(view, R.id.fl__row_conversation__youtube_container);
+        firstDivider = ViewUtils.getView(view, R.id.v__row_conversation__youtube_divider);
+        secondDivider = ViewUtils.getView(view, R.id.v__row_conversation__youtube_second_divider);
         imageView = ViewUtils.getView(view, R.id.iv__row_conversation__youtube_image);
         imageView.setOnClickListener(onDoubleClickListener);
         imageView.setOnLongClickListener(this);
@@ -151,6 +161,8 @@ public class YouTubeMessageViewController extends MessageViewController implemen
         glyphTextView.setOnClickListener(this);
         titleTextView = ViewUtils.getView(view, R.id.ttv__youtube_message__title);
         ephemeralDotAnimationView = ViewUtils.getView(view, R.id.edav__ephemeral_view);
+        ephemeralTypeView = ViewUtils.getView(view, R.id.gtv__row_conversation__youtube__ephemeral_type);
+        ephemeralTypeView.setVisibility(View.GONE);
         headerContainerView = ViewUtils.getView(view, R.id.ll_youtube_message__header_container);
 
         alphaOverlay = ResourceUtils.getResourceFloat(context.getResources(), R.dimen.content__youtube__alpha_overlay);
@@ -165,6 +177,7 @@ public class YouTubeMessageViewController extends MessageViewController implemen
         onDoubleClickListener.reset();
         textMessageLinkTextView.setMessage(message);
         messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(textMessageLinkTextView);
+        messageViewsContainer.getControllerFactory().getAccentColorController().addAccentColorObserver(this);
         ephemeralDotAnimationView.setMessage(message);
         messageModelObserver.setAndUpdate(message);
     }
@@ -189,6 +202,7 @@ public class YouTubeMessageViewController extends MessageViewController implemen
         imageAssetModelObserver.clear();
         if (!messageViewsContainer.isTornDown()) {
             messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(textMessageLinkTextView);
+            messageViewsContainer.getControllerFactory().getAccentColorController().removeAccentColorObserver(this);
         }
         ephemeralDotAnimationView.setMessage(null);
         onDoubleClickListener.reset();
@@ -289,13 +303,31 @@ public class YouTubeMessageViewController extends MessageViewController implemen
         if (loadHandle != null) {
             loadHandle.cancel();
         }
-        imageView.setImageDrawable(new ColorDrawable(ContextCompat.getColor(context, R.color.ephemera)));
+        int accent = messageViewsContainer.getControllerFactory().getAccentColorController().getColor();
+        imageView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                            accent)));
         imageView.setVisibility(View.VISIBLE);
         imageView.setAlpha(1f);
         imageView.clearColorFilter();
+        imageViewContainer.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent));
+        firstDivider.setVisibility(View.GONE);
+        secondDivider.setVisibility(View.GONE);
         glyphTextView.setVisibility(View.GONE);
         errorTextView.setVisibility(View.GONE);
         headerContainerView.setVisibility(View.GONE);
+        ephemeralTypeView.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onAccentColorHasChanged(Object sender, int color) {
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isExpired()) {
+            imageView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                                color)));
+        }
+    }
 }

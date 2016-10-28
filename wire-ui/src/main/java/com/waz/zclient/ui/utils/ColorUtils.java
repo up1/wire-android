@@ -17,11 +17,14 @@
  */
 package com.waz.zclient.ui.utils;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 
 public class ColorUtils {
     private static final int PRESSED_ALPHA = 180;
@@ -56,6 +59,12 @@ public class ColorUtils {
             borderColorPressed = ColorUtils.injectAlpha(alpha, borderColor);
         }
         return borderColorPressed;
+    }
+
+    public static Drawable getTintedDrawable(Context context, int resId, int color) {
+        Drawable drawable = DrawableCompat.wrap(ContextCompat.getDrawable(context, resId));
+        DrawableCompat.setTint(drawable.mutate(), color);
+        return drawable;
     }
 
     public static Drawable getButtonBackground(int borderColor, int fillColor, int strokeWidth, int cornerRadius) {

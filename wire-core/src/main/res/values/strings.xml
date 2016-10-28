@@ -964,6 +964,10 @@
 
     <string name="cursor__type_a_message">TYPE A MESSAGE</string>
     <string name="cursor__ephemeral_message">TIMED MESSAGE</string>
+    <!-- ephemeral duration e.g. "30s" or "1h"-->
+    <string name="cursor__ephemeral_message__timer_seconds">%1$ss</string>
+    <string name="cursor__ephemeral_message__timer_min">%1$sm</string>
+    <string name="cursor__ephemeral_message__timer_days">%1$sd</string>
     <string name="tooltip_record">Record Video</string>
     <string name="tooltip_camera">Add Photo</string>
     <string name="tooltip_sketch">Draw A Picture</string>
@@ -1032,7 +1036,7 @@
     <string name="message_footer__status__failed">Sending failed. _Resend_</string>
     <string name="message_footer__status__deleted">%1$s \u30FB Deleted</string>
 
-    <string name="ephemeral_message__timeout_selection_info">SET A TIMER FOR TEMPORARY MESSAGES</string>
+    <string name="ephemeral_message__timeout_selection_info">SET A TIME FOR THE MESSAGE TO DISAPPEAR</string>
 
     <string name="ephemeral_message__timeout__off">OFF</string>
     <string name="ephemeral_message__timeout__5_sec">5 seconds</string>

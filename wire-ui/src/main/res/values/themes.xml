@@ -34,7 +34,7 @@
         <item name="android:windowAnimationStyle">@style/AnimFadeInZoomOut.Activity</item>
         <item name="dropDownListViewStyle">@style/NoItemBorderListview</item>
         <item name="windowActionModeOverlay">true</item>
-        
+
         <item name="colorControlHighlight" tools:ignore="PrivateResource">@color/ripple_material_dark</item>
 
         <!-- Message Stream -->
@@ -101,6 +101,7 @@
         <item name="circularIconButtonGreen">@style/common__circular_icon_button__green</item>
         <item name="circularIconButtonRed">@style/common__circular_icon_button__red</item>
         <item name="wireBackground">@style/wire__background__dark</item>
+        <item name="wireBackgroundAsTextColor">@style/wire__background_as_text_color__dark</item>
         <item name="strongBackground">@style/common__strong_background__dark</item>
         <item name="wirePrimaryTextColor">@color/text__primary_dark</item>
         <item name="wirePrimaryTextColorReverted">@color/text__primary_light</item>
@@ -234,6 +235,7 @@
         <item name="circularIconButtonGreen">@style/common__circular_icon_button__green</item>
         <item name="circularIconButtonRed">@style/common__circular_icon_button__red</item>
         <item name="wireBackground">@style/message_stream__background__light</item>
+        <item name="wireBackgroundAsTextColor">@style/wire__background_as_text_color__light</item>
         <item name="strongBackground">@style/common__strong_background__light</item>
         <item name="wirePrimaryTextColor">@color/text__primary_light</item>
         <item name="wirePrimaryTextColorReverted">@color/text__primary_dark</item>

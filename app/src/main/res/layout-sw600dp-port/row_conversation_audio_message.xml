@@ -26,14 +26,32 @@
              android:paddingEnd="@dimen/content__row__padding_right"
     >
 
-    <com.waz.zclient.pages.main.conversation.views.row.message.views.ProgressDotsView
-        android:id="@+id/pdv__row_conversation__audio_placeholder_dots"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/content__audio_message__view_height"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/content__padding_left"
         android:layout_marginEnd="@dimen/content__padding_right"
-        android:visibility="gone"
-        />
+        >
+
+        <com.waz.zclient.pages.main.conversation.views.row.message.views.ProgressDotsView
+            android:id="@+id/pdv__row_conversation__audio_placeholder_dots"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/content__audio_message__view_height"
+            android:visibility="gone"
+            />
+
+        <com.waz.zclient.ui.text.GlyphTextView
+            android:id="@+id/gtv__row_conversation__audio__ephemeral_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/wire__text_size__regular"
+            android:text="@string/glyph__microphone_on"
+            style="?wireBackgroundAsTextColor"
+            />
+
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/tfll__audio_message_container"

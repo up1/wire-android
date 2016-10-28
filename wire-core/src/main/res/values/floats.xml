@@ -54,5 +54,10 @@
 
     <item type="dimen" format="float" name="selection__alpha_dark">0.16</item>
     <item type="dimen" format="float" name="selection__alpha_light">0.12</item>
+
+    <item type="dimen" format="float" name="ephemeral__accent__primary_alpha">0.16</item>
+    <item type="dimen" format="float" name="ephemeral__accent__primary_alpha__dark_theme">0.32</item>
+    <item type="dimen" format="float" name="ephemeral__accent__secondary_alpha">0.08</item>
+    <item type="dimen" format="float" name="ephemeral__accent__timer_alpha">0.24</item>
 </resources>
 

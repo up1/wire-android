@@ -169,6 +169,10 @@
         <item name="android:background">@color/background_light</item>
     </style>
 
+    <style name="wire__background_as_text_color__light" parent="@style/wire__background_as_text_color__base">
+        <item name="android:textColor">@color/background_light</item>
+    </style>
+
     <style name="common__strong_background__light" parent="@style/common__strong_background__base">
         <item name="android:background">@color/background_light</item>
     </style>

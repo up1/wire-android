@@ -28,12 +28,14 @@
     <include layout="@layout/row_conversation_text_message" />
 
     <View
+        android:id="@+id/v__row_conversation__youtube_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/wire__divider__height__thin"
         style="?wireDivider"
         />
 
     <FrameLayout
+        android:id="@+id/fl__row_conversation__youtube_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -47,6 +49,17 @@
             android:layout_gravity="center_horizontal"
             android:adjustViewBounds="false"
             android:scaleType="fitXY"
+            />
+
+        <com.waz.zclient.ui.text.GlyphTextView
+            android:id="@+id/gtv__row_conversation__youtube__ephemeral_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/wire__text_size__regular"
+            android:text="@string/glyph__movie"
+            style="?wireBackgroundAsTextColor"
             />
 
         <com.waz.zclient.ui.text.GlyphTextView
@@ -108,6 +121,7 @@
     </FrameLayout>
 
     <View
+        android:id="@+id/v__row_conversation__youtube_second_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/wire__divider__height__thin"
         style="?wireDivider"

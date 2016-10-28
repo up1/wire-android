@@ -82,6 +82,7 @@
     <attr name="circularIconButtonGreen" format="reference" />
     <attr name="circularIconButtonRed" format="reference" />
     <attr name="wireBackground" format="reference" />
+    <attr name="wireBackgroundAsTextColor" format="reference" />
     <attr name="strongBackground" format="reference" />
     <attr name="wireDivider" format="reference" />
     <attr name="tabIndicatorLabel" format="reference" />

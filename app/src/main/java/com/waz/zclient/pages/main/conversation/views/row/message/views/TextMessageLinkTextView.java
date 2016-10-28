@@ -20,7 +20,6 @@ package com.waz.zclient.pages.main.conversation.views.row.message.views;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -44,7 +43,7 @@ public class TextMessageLinkTextView extends LinkTextView implements AccentColor
     private final float textSizeEmoji;
     private final Typeface originalTypeface;
     private final ColorStateList originalTextColor;
-    private final int ephemeralColor;
+    private int accentColor;
 
     private final ModelObserver<Message> messageModelObserver = new ModelObserver<Message>() {
         @Override
@@ -57,7 +56,7 @@ public class TextMessageLinkTextView extends LinkTextView implements AccentColor
             String messageText;
             if (message.isEphemeral() && message.isExpired()) {
                 setTypeface(TypefaceUtils.getTypeface(TypefaceUtils.getRedactedTypedaceName()));
-                setTextColor(ephemeralColor);
+                setTextColor(accentColor);
             } else {
                 setTypeface(originalTypeface);
                 setTextColor(originalTextColor);
@@ -102,7 +101,6 @@ public class TextMessageLinkTextView extends LinkTextView implements AccentColor
         setOnLongClickListener(this);
         originalTypeface = getTypeface();
         originalTextColor = getTextColors();
-        ephemeralColor = ContextCompat.getColor(context, R.color.ephemera);
     }
 
     /*
@@ -141,6 +139,7 @@ public class TextMessageLinkTextView extends LinkTextView implements AccentColor
     }
 
     public void setMessage(final Message message) {
+
         messageModelObserver.setAndUpdate(message);
     }
 
@@ -153,6 +152,7 @@ public class TextMessageLinkTextView extends LinkTextView implements AccentColor
     @Override
     public void onAccentColorHasChanged(Object sender, int color) {
         setLinkTextColor(color);
+        accentColor = color;
     }
 
     public void recycle() {

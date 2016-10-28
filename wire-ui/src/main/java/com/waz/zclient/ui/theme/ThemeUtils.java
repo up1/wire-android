@@ -20,6 +20,7 @@ package com.waz.zclient.ui.theme;
 import android.content.Context;
 import android.util.TypedValue;
 import com.waz.zclient.ui.R;
+import com.waz.zclient.ui.utils.ResourceUtils;
 
 public class ThemeUtils {
     private ThemeUtils() {}
@@ -31,5 +32,11 @@ public class ThemeUtils {
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.themeName, outValue, true);
         return "dark".equals(outValue.string);
+    }
+
+    public static float getEphemeralBackgroundAlpha(Context context) {
+        return isDarkTheme(context) ?
+               ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__primary_alpha__dark_theme) :
+               ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__primary_alpha);
     }
 }

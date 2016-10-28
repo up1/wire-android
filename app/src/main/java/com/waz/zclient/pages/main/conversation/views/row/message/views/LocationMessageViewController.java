@@ -41,6 +41,9 @@ import com.waz.zclient.pages.main.conversation.views.MessageViewsContainer;
 import com.waz.zclient.pages.main.conversation.views.row.message.MessageViewController;
 import com.waz.zclient.pages.main.conversation.views.row.separator.Separator;
 import com.waz.zclient.ui.text.GlyphTextView;
+import com.waz.zclient.ui.theme.ThemeUtils;
+import com.waz.zclient.ui.utils.ColorUtils;
+import com.waz.zclient.ui.utils.ResourceUtils;
 import com.waz.zclient.ui.utils.TypefaceUtils;
 import com.waz.zclient.ui.views.EphemeralDotAnimationView;
 import com.waz.zclient.utils.IntentUtils;
@@ -63,6 +66,7 @@ public class LocationMessageViewController extends MessageViewController impleme
     private TextView mapPlaceholderText;
     private GlyphTextView pinView;
     private EphemeralDotAnimationView ephemeralDotAnimationView;
+    private View ephemeralTypeView;
 
     private ImageAsset imageAsset;
     private LoadHandle bitmapLoadHandle;
@@ -156,6 +160,8 @@ public class LocationMessageViewController extends MessageViewController impleme
         pinImage = ViewUtils.getView(view, R.id.iv__row_conversation__map_pin_image);
         pinView.setTextColor(ContextCompat.getColor(context, R.color.accent_blue));
         ephemeralDotAnimationView = ViewUtils.getView(view, R.id.edav__ephemeral_view);
+        ephemeralTypeView = ViewUtils.getView(view, R.id.gtv__row_conversation__location__ephemeral_type);
+        ephemeralTypeView.setVisibility(View.GONE);
 
         imageWidth = getImageWidth();
         originalLocationNameTypeface = locationName.getTypeface();
@@ -274,6 +280,16 @@ public class LocationMessageViewController extends MessageViewController impleme
     @Override
     public void onAccentColorHasChanged(Object sender, int color) {
         pinView.setTextColor(color);
+        ephemeralDotAnimationView.setPrimaryColor(color);
+        ephemeralDotAnimationView.setSecondaryColor(ColorUtils.injectAlpha(ResourceUtils.getResourceFloat(context.getResources(), R.dimen.ephemeral__accent__timer_alpha),
+                                                                           color));
+        if (message != null &&
+            message.isEphemeral() &&
+            message.isExpired()) {
+            mapImageView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                                   color)));
+            locationName.setTextColor(color);
+        }
     }
 
     private void messageExpired() {
@@ -285,10 +301,12 @@ public class LocationMessageViewController extends MessageViewController impleme
         pinImage.setVisibility(View.INVISIBLE);
         pinView.setVisibility(View.INVISIBLE);
         mapPlaceholderText.setVisibility(View.INVISIBLE);
-        int ephemeralColor = ContextCompat.getColor(context, R.color.ephemera);
-        mapImageView.setImageDrawable(new ColorDrawable(ephemeralColor));
+        int accent = messageViewsContainer.getControllerFactory().getAccentColorController().getColor();
+        mapImageView.setImageDrawable(new ColorDrawable(ColorUtils.injectAlpha(ThemeUtils.getEphemeralBackgroundAlpha(context),
+                                                                               accent)));
         Typeface redactedTypeface = TypefaceUtils.getTypeface(TypefaceUtils.getRedactedTypedaceName());
         locationName.setTypeface(redactedTypeface);
-        locationName.setTextColor(ephemeralColor);
+        locationName.setTextColor(accent);
+        ephemeralTypeView.setVisibility(View.VISIBLE);
     }
 }

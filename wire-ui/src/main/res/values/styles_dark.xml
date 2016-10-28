@@ -170,6 +170,10 @@
         <item name="android:background">@color/background_dark</item>
     </style>
 
+    <style name="wire__background_as_text_color__dark" parent="@style/wire__background_as_text_color__base">
+        <item name="android:textColor">@color/background_dark</item>
+    </style>
+
     <style name="common__strong_background__dark" parent="@style/common__strong_background__base">
         <item name="android:background">#000000</item>
     </style>

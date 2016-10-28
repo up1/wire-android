@@ -105,6 +105,17 @@
 
         </LinearLayout>
 
+        <com.waz.zclient.ui.text.GlyphTextView
+            android:id="@+id/gtv__row_conversation__location__ephemeral_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/wire__text_size__regular"
+            android:text="@string/glyph__location"
+            style="?wireBackgroundAsTextColor"
+            />
+
     </android.support.v7.widget.CardView>
 
     <com.waz.zclient.ui.views.EphemeralDotAnimationView

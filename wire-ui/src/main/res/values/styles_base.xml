@@ -203,6 +203,7 @@
     </style>
 
     <style name="wire__background__base" />
+    <style name="wire__background_as_text_color__base" />
 
     <style name="common__strong_background__base" />
 
